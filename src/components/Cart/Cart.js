@@ -60,6 +60,7 @@ const Cart = (props) => {
             </ul>;
 
     const orderSuccess =  <h2 className={classes['text-center']}><CorrectIcon /> Order Placed Successfully</h2>
+    const showForm = cartCtx.items.length > 0;
 
     return (<Modal onHideCart={props.onHideCart}>
         {(!order) && cartItems}
@@ -70,7 +71,7 @@ const Cart = (props) => {
                 <span>{totalAmount}</span>
             </div>
         }
-        {isCheckedOut && <Checkout onCancel={props.onHideCart} onConfirm={submitOrderHandler} />}
+        {showForm && isCheckedOut && <Checkout onCancel={props.onHideCart} onConfirm={submitOrderHandler} />}
         {!isCheckedOut && <div className={classes.actions}>
             <button className={classes['button--alt']} onClick={props.onHideCart}>Close</button>
             { (!order) && hasItems && <button onClick={cartOrderHandler} className={classes.button}>Order</button> }
