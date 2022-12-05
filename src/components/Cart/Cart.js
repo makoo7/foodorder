@@ -4,22 +4,27 @@ import CartItem from './CartItem';
 import CorrectIcon from './CorrectIcon';
 import classes from './Cart.module.css';
 import CartContext from '../../store/cart-context';
+import Checkout from './Checkout';
 import axios from 'axios';
 
 const Cart = (props) => {
     const [order, setOrder] = useState(false);
+    const [isCheckedOut, setIsCheckedOut] = useState(false);
     const cartCtx = useContext(CartContext);
     const totalAmount = `$${cartCtx.totalAmount.toFixed(2)}`;
     const hasItems = cartCtx.items.length > 0;
 
-    const orderItems = (items, totalAmount) => {
+    const orderItems = (items, totalAmount, user) => {
         const order = {
             items: items,
-            total_amount: totalAmount
+            total_amount: totalAmount,
+            user: user
         }
+        
         axios.post(`${process.env.REACT_APP_API_URL}/orders`, order)
         .then(function(response){
             setOrder(response.data);
+            setIsCheckedOut(false);
             cartCtx.emptyCart();
         })
         .catch(function(error){})
@@ -33,9 +38,14 @@ const Cart = (props) => {
     }
 
     const cartOrderHandler = () => {
+        setIsCheckedOut(true);
+    }
+
+    const submitOrderHandler = (userData) => {
         const items = cartCtx.items;
         const totalAmount = cartCtx.totalAmount;
-        orderItems(items, totalAmount)
+        const user = userData;
+        orderItems(items, totalAmount, user);
     }
 
     const cartItems = <ul className={classes['cart-items']}>
@@ -60,10 +70,11 @@ const Cart = (props) => {
                 <span>{totalAmount}</span>
             </div>
         }
-        <div className={classes.actions}>
+        {isCheckedOut && <Checkout onCancel={props.onHideCart} onConfirm={submitOrderHandler} />}
+        {!isCheckedOut && <div className={classes.actions}>
             <button className={classes['button--alt']} onClick={props.onHideCart}>Close</button>
             { (!order) && hasItems && <button onClick={cartOrderHandler} className={classes.button}>Order</button> }
-        </div>
+        </div>}
     </Modal>);
 }
 
